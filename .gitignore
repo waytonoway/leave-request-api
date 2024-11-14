@@ -1,0 +1,19 @@
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> symfony/composer ### Keep this versioneted on release and master branches using the -f option
+symfony.lock
+composer.lock
+###< symfony/composer ### Make sure you checkout or remove them when merging with build using the --mo-commit optionn
+
+###> Editor Files ###
+.idea
+.DS_Store
