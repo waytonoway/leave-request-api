@@ -53,25 +53,33 @@ class LeaveRequestController extends BaseController {
         $form = $this->createForm(LeaveRequestType::class, $leaveRequest);
 
         $formData = json_decode($request->getContent(), true);
-        $form->submit($formData);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $existingLeaveRequest = $this->entityManager->getRepository(LeaveRequest::class)
-                ->findLeaveRequestsByDates($leaveRequest->getStartDate(), $leaveRequest->getEndDate(), $leaveRequest->getUser());
-
-            if (!empty($existingLeaveRequest)) {
-                $form->addError(new FormError("Leave request overlaps with an existing one."));
-            }
-
-            if (count($form->getErrors()) === 0) {
-                $this->entityManager->persist($leaveRequest);
-                $this->entityManager->flush();
-
-                return $this->returnResponse($leaveRequest, ["leave_request", "leave_type", "user"], Response::HTTP_CREATED);
-            }
-        }
-
         $errors = [];
+
+        try {
+            $form->submit($formData);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                if ($leaveRequest->getStartDate() <= (new \DateTime())) {
+                    throw new \Exception("Leave request start date can't be in the past");
+                }
+
+                $existingLeaveRequest = $this->entityManager->getRepository(LeaveRequest::class)
+                    ->findLeaveRequestsByDates($leaveRequest->getStartDate(), $leaveRequest->getEndDate(), $leaveRequest->getUser());
+
+                if (!empty($existingLeaveRequest)) {
+                    throw new \Exception("Leave request overlaps with an existing one.");
+                }
+
+                if (count($form->getErrors()) === 0) {
+                    $this->entityManager->persist($leaveRequest);
+                    $this->entityManager->flush();
+
+                    return $this->returnResponse($leaveRequest, ["leave_request", "leave_type", "user"], Response::HTTP_CREATED);
+                }
+            }
+        } catch (\Exception $exception) {
+            $errors[] = $exception->getMessage();
+        }
 
         foreach ($form->getErrors(true) as $error) {
             $errors[] = $error->getMessage();

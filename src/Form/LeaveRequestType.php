@@ -44,6 +44,10 @@ class LeaveRequestType extends AbstractType {
                 $data["start_date"] = new \DateTime($data["start_date"]);
                 $data["end_date"] = new \DateTime($data["end_date"]);
 
+                if ($data["start_date"] >= $data["end_date"]) {
+                    throw new \Exception("End date can't be less than start date");
+                }
+
                 $event->setData($data);
             });
     }
