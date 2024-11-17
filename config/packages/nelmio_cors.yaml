@@ -1,8 +1,8 @@
 nelmio_cors:
     defaults:
         allow_credentials: true
-        allow_origin: ['http://localhost:3000'] # Add your React app's origin
+        allow_origin: ['http://localhost:3000', 'http://localhost:3003', 'http://127.0.0.1:8000']
         allow_headers: ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With']
-        allow_methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+        allow_methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', "PATCH"]
         expose_headers: ['Link']
         max_age: 3600
