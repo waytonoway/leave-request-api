@@ -22,6 +22,14 @@ class LeaveRequestController extends BaseController {
     /**
      * @Route("", name="get", methods={"GET"})
      *
+     * @OA\Parameter(name="order", in="query", description="Order of results", @OA\Schema(type="string"))
+     * @OA\Parameter(name="page", in="query", description="Page result in paginated response", @OA\Schema(type="int"))
+     * @OA\Parameter(name="limit", in="query", description="Limit in paginated response", @OA\Schema(type="int"))
+     * @OA\Parameter(name="search_query", in="query", description="Limit in paginated response", @OA\Schema(type="int"))
+     * @OA\Parameter(name="start_date", in="query", description="Filter by start date", @OA\Schema(type="int"))
+     * @OA\Parameter(name="end_date", in="query", description="Filter by end date", @OA\Schema(type="int"))
+     * @OA\Parameter(name="user", in="query", description="Filter by end date", @OA\Schema(type="int"))
+     *
      * @OA\Response(
      *      response=200,
      *      description="Returns leave requests",
@@ -29,9 +37,40 @@ class LeaveRequestController extends BaseController {
      *  )
      */
     public function getLeaveRequests(Request $request): JsonResponse {
-        $items = $this->entityManager->getRepository(LeaveRequest::class)->findAll();
+        $page = (int) $request->query->get("page", 1);
+        $limit = (int) $request->query->get("limit", 10);
+        $startDate = $request->query->get("start_date");
+        $endDate = $request->query->get("end_date");
+        $userId = $request->query->get("user");
+        $offset = ($page - 1) * $limit;
 
-        return $this->returnResponse($items, ["leave_request", "leave_type", "user"]);
+        $criteria = [];
+        if ($startDate) {
+            $criteria["startDate"] = new \DateTime($startDate);
+        }
+
+        if ($endDate) {
+            $criteria["endDate"] = new \DateTime($endDate);
+        }
+
+        if ($userId) {
+            $criteria["user"] = $userId;
+        }
+
+        $items = $this->entityManager->getRepository(LeaveRequest::class)
+            ->findBy($criteria, [], $limit, $offset);
+
+        $totalCountQuery = $this->entityManager->getRepository(LeaveRequest::class)
+            ->createQueryBuilder("lr")
+            ->select("COUNT(lr.id)");
+        $this->buildFilterConditions($totalCountQuery, $criteria);
+        $totalCount = $totalCountQuery
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $headers = ["X-Total-Count" => $totalCount];
+
+        return $this->returnResponse($items, ["leave_request", "leave_type", "user"], Response::HTTP_OK, $headers);
     }
 
     /**
@@ -86,5 +125,30 @@ class LeaveRequestController extends BaseController {
         }
 
         return new JsonResponse(["errors" => $errors], Response::HTTP_BAD_REQUEST);
+    }
+
+    private function buildFilterConditions($query, array $criteria): array {
+        $conditions = [];
+        $params = [];
+
+        if (isset($criteria["startDate"])) {
+            $conditions[] = "lr.startDate >= :startDate";
+            $params["startDate"] = $criteria["startDate"];
+        }
+
+        if (isset($criteria["endDate"])) {
+            $conditions[] = "lr.endDate <= :endDate";
+            $params["endDate"] = $criteria["endDate"];
+        }
+
+        if (isset($criteria["user"])) {
+            $conditions[] = "lr.user = :user";
+            $params["user"] = $criteria["user"];
+        }
+
+        $query->where(join(" AND ", $conditions));
+        $query->setParameters($params);
+
+        return $conditions;
     }
 }

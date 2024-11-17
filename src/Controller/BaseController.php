@@ -18,11 +18,11 @@ class BaseController extends AbstractController {
         $this->serializer = $serializer;
     }
 
-    public function returnResponse($data, array $groups, int $status = Response::HTTP_OK): JsonResponse {
+    public function returnResponse($data, array $groups, int $status = Response::HTTP_OK, array $headers = []): JsonResponse {
         $jsonContent = $this->serializer->serialize(
             $data, "json", SerializationContext::create()->setGroups($groups)
         );
 
-        return new JsonResponse($jsonContent, $status, [], true);
+        return new JsonResponse($jsonContent, $status, $headers, true);
     }
 }
