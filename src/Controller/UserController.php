@@ -11,14 +11,8 @@ use OpenApi\Annotations as OA;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\Routing\Annotation\Route;
 
-/** @Route(path="users") */
-class UserController extends AbstractController {
-    private EntityManagerInterface $entityManager;
-
-    public function __construct(EntityManagerInterface $em) {
-        $this->entityManager = $em;
-    }
-
+/** @Route(path="api/users") */
+class UserController extends BaseController {
     /**
      * @Route(methods={"GET"})
      *
@@ -29,6 +23,9 @@ class UserController extends AbstractController {
      * )
      */
     public function cgetAction(Request $request) {
-        return $this->entityManager->getRepository(User::class)->findAll();
+        $data = $this->entityManager->getRepository(User::class)
+            ->findBy([], ["lastName" => "ASC"]);
+
+        return $this->returnResponse($data, ["user"]);
     }
 }

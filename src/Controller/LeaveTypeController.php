@@ -5,20 +5,21 @@ namespace App\Controller;
 use App\Entity\LeaveType;
 
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\SerializationContext;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use OpenApi\Annotations as OA;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use Symfony\Component\Routing\Annotation\Route;
 
-/** @Route(path="leave_types") */
-class LeaveTypeController extends AbstractController {
-    private EntityManagerInterface $entityManager;
+use JMS\Serializer\ContextFactory\SerializationContextFactoryInterface;
+use JMS\Serializer\SerializerInterface;
 
-    public function __construct(EntityManagerInterface $em) {
-        $this->entityManager = $em;
-    }
-
+/**
+ * @Route(path="api/leave-types", name="leave_types")
+ */
+class LeaveTypeController extends BaseController {
     /**
      * @Route(methods={"GET"})
      *
@@ -28,7 +29,10 @@ class LeaveTypeController extends AbstractController {
      *     @OA\JsonContent(type="array", @OA\Items(ref=@Model(type=LeaveType::class, groups={"leave_type"})))
      * )
      */
-    public function cgetAction(Request $request) {
-        return $this->entityManager->getRepository(LeaveType::class)->findAll();
+    public function cgetAction(Request $request): JsonResponse {
+        $leaveTypes = $this->entityManager->getRepository(LeaveType::class)
+            ->findBy([], ["type" => "ASC"]);
+
+        return $this->returnResponse($leaveTypes, ["leave_type"]);
     }
 }

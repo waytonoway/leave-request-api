@@ -1,0 +1,6 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: 'Leave Request API'
+            description: 'API for managing leave requests'
+            version: '1.0.0'

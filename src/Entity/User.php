@@ -2,14 +2,15 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 /**
  * @ORM\Table(name="user", indexes={
- *         @ORM\Index(columns={"email"}),
- *         @ORM\Index(columns={"position"})
- *    })
+ *     @ORM\Index(columns={"last_name"}),
+ *     @ORM\Index(columns={"email"}),
+ *     @ORM\Index(columns={"position"})
+ * })
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
- *
  */
 class User
 {
@@ -17,31 +18,37 @@ class User
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Serializer\Groups({"user"})
      */
     private $id;
 
     /**
      * @ORM\Column(name="first_name", type="string", length=255)
+     * @Serializer\Groups({"user"})
      */
     private $firstName;
 
     /**
      * @ORM\Column(name="last_name", type="string", length=255)
+     * @Serializer\Groups({"user"})
      */
     private $lastName;
 
     /**
      * @ORM\Column(name="middle_name", type="string", length=255, nullable=true)
+     * @Serializer\Groups({"user"})
      */
     private $middleName;
 
     /**
      * @ORM\Column(type="string", length=50, nullable=true)
+     * @Serializer\Groups({"user"})
      */
     private $position;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
+     * @Serializer\Groups({"user"})
      */
     private $email;
 
