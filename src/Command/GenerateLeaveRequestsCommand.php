@@ -59,7 +59,7 @@ class GenerateLeaveRequestsCommand extends Command
             $user = $faker->randomElement($users);
             $leaveType = $faker->randomElement($leaveTypes);
 
-            $startDate = $faker->dateTimeBetween("-1 year", "+2 year");
+            $startDate = $faker->dateTimeBetween("-2 year", "-1 day");
             $endDate = (clone $startDate)->modify("+" . $faker->numberBetween(1, 21) . " days");
 
             $overlapping = $this->checkOverlapping($user, $startDate, $endDate);
