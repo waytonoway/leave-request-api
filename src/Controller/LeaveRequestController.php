@@ -42,31 +42,31 @@ class LeaveRequestController extends BaseController {
         $startDate = $request->query->get("start_date");
         $endDate = $request->query->get("end_date");
         $userId = $request->query->get("user");
+        $searchQuery = $request->query->get("search_query");
         $offset = ($page - 1) * $limit;
 
         $criteria = [];
         if ($startDate) {
-            $criteria["startDate"] = new \DateTime($startDate);
+            $criteria["start_date"] = new \DateTime($startDate);
         }
 
         if ($endDate) {
-            $criteria["endDate"] = new \DateTime($endDate);
+            $criteria["end_date"] = new \DateTime($endDate);
         }
 
         if ($userId) {
             $criteria["user"] = $userId;
         }
 
-        $items = $this->entityManager->getRepository(LeaveRequest::class)
-            ->findBy($criteria, [], $limit, $offset);
+        if ($searchQuery) {
+            $criteria["search_query"] = $searchQuery;
+        }
 
-        $totalCountQuery = $this->entityManager->getRepository(LeaveRequest::class)
-            ->createQueryBuilder("lr")
-            ->select("COUNT(lr.id)");
-        $this->buildFilterConditions($totalCountQuery, $criteria);
-        $totalCount = $totalCountQuery
-            ->getQuery()
-            ->getSingleScalarResult();
+        $items = $this->entityManager->getRepository(LeaveRequest::class)
+            ->findByFilter($criteria, $offset, $limit);
+
+        $totalCount = $this->entityManager->getRepository(LeaveRequest::class)
+            ->countByFilter($criteria);
 
         $headers = ["X-Total-Count" => $totalCount];
 
@@ -125,30 +125,5 @@ class LeaveRequestController extends BaseController {
         }
 
         return new JsonResponse(["errors" => $errors], Response::HTTP_BAD_REQUEST);
-    }
-
-    private function buildFilterConditions($query, array $criteria): array {
-        $conditions = [];
-        $params = [];
-
-        if (isset($criteria["startDate"])) {
-            $conditions[] = "lr.startDate >= :startDate";
-            $params["startDate"] = $criteria["startDate"];
-        }
-
-        if (isset($criteria["endDate"])) {
-            $conditions[] = "lr.endDate <= :endDate";
-            $params["endDate"] = $criteria["endDate"];
-        }
-
-        if (isset($criteria["user"])) {
-            $conditions[] = "lr.user = :user";
-            $params["user"] = $criteria["user"];
-        }
-
-        $query->where(join(" AND ", $conditions));
-        $query->setParameters($params);
-
-        return $conditions;
     }
 }
