@@ -41,7 +41,7 @@ class AddLeaveTypeCommand extends Command
         if (empty($types)) {
             $output->writeln("<comment>No leave types provided.</comment>");
 
-            return 0;
+            return Command::FAILURE;
         }
 
         $types = $this->sanitiseTypes($types, $output);
@@ -52,7 +52,7 @@ class AddLeaveTypeCommand extends Command
 
         $output->writeln(count($types) . " types added.");
 
-        return 1;
+        return Command::SUCCESS;
     }
 
     private function sanitiseTypes(array $types, OutputInterface $output): array {

@@ -46,7 +46,7 @@ class AddDummyUsersCommand extends Command
 
         $output->writeln($amount . " users added.");
 
-        return 1;
+        return Command::SUCCESS;
     }
 
     private function generateName(bool $isFirst = true): string {

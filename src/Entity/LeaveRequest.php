@@ -5,7 +5,13 @@ use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
 
 /**
- * @ORM\Table(name="leave_request")
+ * @ORM\Table(name="leave_request", indexes={
+ *        @ORM\Index(columns={"start_date"}),
+ *        @ORM\Index(columns={"end_date"}),
+ *        @ORM\Index(columns={"reason"}),
+ *        @ORM\Index(columns={"user_id", "start_date", "end_date"}),
+ *
+ *   })
  * @ORM\Entity(repositoryClass="App\Repository\LeaveRequestRepository")
  */
 class LeaveRequest
@@ -32,7 +38,7 @@ class LeaveRequest
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\LeaveType")
-     * @ORM\JoinColumn(name="leave_type", nullable=false)
+     * @ORM\JoinColumn(name="leave_type_id", nullable=false, referencedColumnName="id")
      * @Serializer\Groups({"leave_request"})
      */
     private $leaveType;
@@ -45,7 +51,7 @@ class LeaveRequest
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\User")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\JoinColumn(name="user_id", nullable=false, referencedColumnName="id")
      * @Serializer\Groups({"leave_request"})
      */
     private $user;
